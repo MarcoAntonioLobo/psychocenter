@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,16 +30,19 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    private Patient patient;
+
+    @OneToOne
+    private Supervision supervision;
+
     @Enumerated(EnumType.STRING)
     private PackageType packageType;
 
     private BigDecimal amount;
+
     private LocalDate paymentDate;
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private PaymentStatus status = PaymentStatus.PAID;
-
-    @ManyToOne
-    private Patient patient;
+    private PaymentStatus status;
 }

@@ -1,16 +1,17 @@
 package com.psy.psychocenter.model;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
-import com.psy.psychocenter.model.enums.SupervisionStatus;
+import com.psy.psychocenter.model.enums.GroupType;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,19 +23,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Supervision {
+public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String supervisorName;
-    private String notes;
-    private LocalDateTime dateTime;
+
+    private String name;
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private SupervisionStatus status = SupervisionStatus.SCHEDULED;
+    private GroupType type;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToMany
+    private List<Patient> patients;
+
+    @ManyToMany
+    private List<Supervision> supervisions;
+
+    @ManyToOne
     private Payment payment;
+
+    @OneToOne
+    private Appointment appointment;
 }

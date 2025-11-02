@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.psy.psychocenter.dto.PaymentRequestDTO;
+import com.psy.psychocenter.dto.PaymentResponseDTO;
 import com.psy.psychocenter.dto.SupervisionRequestDTO;
 import com.psy.psychocenter.dto.SupervisionResponseDTO;
 import com.psy.psychocenter.service.SupervisionService;
@@ -25,6 +27,7 @@ public class SupervisionController {
 
     private final SupervisionService supervisionService;
 
+    // ===== Supervision CRUD =====
     @PostMapping
     public ResponseEntity<SupervisionResponseDTO> create(@RequestBody SupervisionRequestDTO dto) {
         return ResponseEntity.ok(supervisionService.create(dto));
@@ -41,7 +44,8 @@ public class SupervisionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SupervisionResponseDTO> update(@PathVariable Long id, @RequestBody SupervisionRequestDTO dto) {
+    public ResponseEntity<SupervisionResponseDTO> update(@PathVariable Long id,
+                                                         @RequestBody SupervisionRequestDTO dto) {
         return ResponseEntity.ok(supervisionService.update(id, dto));
     }
 
@@ -49,5 +53,23 @@ public class SupervisionController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         supervisionService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ===== Payment Endpoints for Supervision =====
+    @GetMapping("/{id}/payments")
+    public ResponseEntity<PaymentResponseDTO> getPayment(@PathVariable Long id) {
+        return ResponseEntity.ok(supervisionService.getPayment(id));
+    }
+
+    @PostMapping("/{id}/payments")
+    public ResponseEntity<PaymentResponseDTO> createPayment(@PathVariable Long id,
+                                                            @RequestBody PaymentRequestDTO dto) {
+        return ResponseEntity.ok(supervisionService.createPayment(id, dto));
+    }
+
+    @PutMapping("/{id}/payments")
+    public ResponseEntity<PaymentResponseDTO> updatePayment(@PathVariable Long id,
+                                                            @RequestBody PaymentRequestDTO dto) {
+        return ResponseEntity.ok(supervisionService.updatePayment(id, dto));
     }
 }

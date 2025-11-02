@@ -41,4 +41,7 @@ public class Appointment {
 
     @ManyToOne
     private Patient patient;
+    
+    @ManyToOne
+    private Supervision supervision;
 }

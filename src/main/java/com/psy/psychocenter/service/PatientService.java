@@ -31,15 +31,21 @@ public class PatientService {
     private final AppointmentMapper appointmentMapper;
     private final PaymentMapper paymentMapper;
 
-    // Criar paciente
     @Transactional
     public PatientResponseDTO create(PatientRequestDTO dto) {
+        patientRepository.findByEmail(dto.email()).ifPresent(p -> {
+            throw new RuntimeException("Email already exists");
+        });
+
+        if (dto.packageCount() < 0) {
+            throw new RuntimeException("Package count cannot be negative");
+        }
+
         Patient patient = patientMapper.toEntity(dto);
         Patient saved = patientRepository.save(patient);
         return patientMapper.toResponse(saved);
     }
 
-    // Buscar todos
     @Transactional(readOnly = true)
     public List<PatientResponseDTO> findAll() {
         return patientRepository.findAll()
@@ -48,7 +54,6 @@ public class PatientService {
                 .toList();
     }
 
-    // Buscar por ID
     @Transactional(readOnly = true)
     public PatientResponseDTO findById(Long id) {
         return patientRepository.findById(id)
@@ -56,11 +61,18 @@ public class PatientService {
                 .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
     }
 
-    // Atualizar paciente
     @Transactional
     public PatientResponseDTO update(Long id, PatientRequestDTO dto) {
         Patient existing = patientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+
+        patientRepository.findByEmail(dto.email())
+                .filter(p -> !p.getId().equals(id))
+                .ifPresent(p -> { throw new RuntimeException("Email already exists"); });
+
+        if (dto.packageCount() < 0) {
+            throw new RuntimeException("Package count cannot be negative");
+        }
 
         existing.setName(dto.name());
         existing.setEmail(dto.email());
@@ -71,7 +83,6 @@ public class PatientService {
         return patientMapper.toResponse(updated);
     }
 
-    // Deletar paciente
     @Transactional
     public void delete(Long id) {
         if (!patientRepository.existsById(id)) {
@@ -80,7 +91,6 @@ public class PatientService {
         patientRepository.deleteById(id);
     }
 
-    // Listar agendamentos do paciente
     @Transactional(readOnly = true)
     public List<AppointmentResponseDTO> getAppointments(Long patientId) {
         Patient patient = patientRepository.findById(patientId)
@@ -92,7 +102,6 @@ public class PatientService {
                 .toList();
     }
 
-    // Listar pagamentos do paciente
     @Transactional(readOnly = true)
     public List<PaymentResponseDTO> getPayments(Long patientId) {
         if (!patientRepository.existsById(patientId)) {
@@ -105,3 +114,4 @@ public class PatientService {
                 .toList();
     }
 }
+

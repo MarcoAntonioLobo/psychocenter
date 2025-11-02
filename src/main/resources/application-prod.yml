@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/psychocenter
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+# Swagger desabilitado em produção
+springdoc:
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: WARN

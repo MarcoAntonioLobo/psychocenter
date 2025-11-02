@@ -35,6 +35,7 @@ public class Patient {
 
     @Builder.Default
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Appointment> appointments = new ArrayList<>();
+    private List<Payment> payments = new ArrayList<>();
+
 }
 

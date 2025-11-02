@@ -1,5 +1,6 @@
 package com.psy.psychocenter.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -21,11 +22,15 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PatientRepository patientRepository;
 
-    // ✅ Criar pagamento
     @Transactional
     public PaymentResponseDTO create(PaymentRequestDTO dto) {
         Patient patient = patientRepository.findById(dto.patientId())
                 .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+
+        if (dto.amount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("Amount cannot be negative");
+
+        }
 
         Payment payment = Payment.builder()
                 .patient(patient)
@@ -39,7 +44,6 @@ public class PaymentService {
         return toResponse(payment);
     }
 
-    // ✅ Buscar todos os pagamentos
     @Transactional(readOnly = true)
     public List<PaymentResponseDTO> getAll() {
         return paymentRepository.findAll()
@@ -48,7 +52,6 @@ public class PaymentService {
                 .toList();
     }
 
-    // ✅ Buscar pagamento por ID
     @Transactional(readOnly = true)
     public PaymentResponseDTO getById(Long id) {
         Payment payment = paymentRepository.findById(id)
@@ -56,7 +59,6 @@ public class PaymentService {
         return toResponse(payment);
     }
 
-    // ✅ Buscar pagamentos de um paciente
     @Transactional(readOnly = true)
     public List<PaymentResponseDTO> getByPatient(Long patientId) {
         return paymentRepository.findByPatientId(patientId)
@@ -65,7 +67,6 @@ public class PaymentService {
                 .toList();
     }
 
-    // ✅ Atualizar pagamento
     @Transactional
     public PaymentResponseDTO update(Long id, PaymentRequestDTO dto) {
         Payment payment = paymentRepository.findById(id)
@@ -73,6 +74,10 @@ public class PaymentService {
 
         Patient patient = patientRepository.findById(dto.patientId())
                 .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+
+        if (dto.amount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("Amount cannot be negative");
+        }
 
         payment.setPatient(patient);
         payment.setPackageType(dto.packageType());
@@ -84,7 +89,6 @@ public class PaymentService {
         return toResponse(payment);
     }
 
-    // ✅ Deletar pagamento
     @Transactional
     public void delete(Long id) {
         if (!paymentRepository.existsById(id)) {
@@ -93,7 +97,6 @@ public class PaymentService {
         paymentRepository.deleteById(id);
     }
 
-    // ✅ Conversão para DTO
     private PaymentResponseDTO toResponse(Payment payment) {
         return new PaymentResponseDTO(
                 payment.getId(),
