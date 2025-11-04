@@ -16,15 +16,15 @@ public class PaymentMapper {
                 .packageType(dto.packageType())
                 .amount(dto.amount())
                 .paymentDate(dto.paymentDate())
-                .status(dto.status() != null ? dto.status() : null)
+                .status(dto.status())
                 .build();
     }
 
     public PaymentResponseDTO toResponse(Payment payment) {
         return new PaymentResponseDTO(
                 payment.getId(),
-                payment.getPatient().getId(),
-                payment.getPatient().getName(),
+                payment.getPatient() != null ? payment.getPatient().getId() : null,
+                payment.getPatient() != null ? payment.getPatient().getName() : null,
                 payment.getPackageType(),
                 payment.getAmount(),
                 payment.getPaymentDate(),

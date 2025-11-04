@@ -2,6 +2,7 @@ package com.psy.psychocenter.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,10 +28,10 @@ public class SupervisionController {
 
     private final SupervisionService supervisionService;
 
-    // ===== Supervision CRUD =====
     @PostMapping
     public ResponseEntity<SupervisionResponseDTO> create(@RequestBody SupervisionRequestDTO dto) {
-        return ResponseEntity.ok(supervisionService.create(dto));
+        SupervisionResponseDTO created = supervisionService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
@@ -55,7 +56,6 @@ public class SupervisionController {
         return ResponseEntity.noContent().build();
     }
 
-    // ===== Payment Endpoints for Supervision =====
     @GetMapping("/{id}/payments")
     public ResponseEntity<PaymentResponseDTO> getPayment(@PathVariable Long id) {
         return ResponseEntity.ok(supervisionService.getPayment(id));
@@ -64,7 +64,8 @@ public class SupervisionController {
     @PostMapping("/{id}/payments")
     public ResponseEntity<PaymentResponseDTO> createPayment(@PathVariable Long id,
                                                             @RequestBody PaymentRequestDTO dto) {
-        return ResponseEntity.ok(supervisionService.createPayment(id, dto));
+        PaymentResponseDTO created = supervisionService.createPayment(id, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}/payments")

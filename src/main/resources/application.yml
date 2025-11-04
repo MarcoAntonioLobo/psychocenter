@@ -1,8 +1,56 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/psychocenter
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
   profiles:
     active: dev
 
-logging:
-  level:
-    root: INFO
+---
 
+# 🔹 Perfil DEV (Swagger habilitado)
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+
+  swagger-ui:
+    path: /swagger-ui
+    enabled: true
+    display-request-duration: true
+    tryItOutEnabled: true
+    tagsSorter: alpha
+    operationsSorter: method
+
+    # 🖤 Tema escuro oficial
+    custom-css-url: https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-dark.css
+
+    # 🧠 Customização visual
+    customfav-icon: https://cdn-icons-png.flaticon.com/512/3202/3202926.png
+    title: "🧠 Psycenter API - Dev Mode"
+
+---
+
+# 🔹 Perfil PROD (Swagger desabilitado)
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

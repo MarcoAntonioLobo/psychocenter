@@ -28,12 +28,8 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<AppointmentResponseDTO> create(@RequestBody AppointmentRequestDTO dto) {
-        try {
-            AppointmentResponseDTO created = appointmentService.create(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        AppointmentResponseDTO created = appointmentService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
@@ -44,32 +40,20 @@ public class AppointmentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> findById(@PathVariable Long id) {
-        try {
-            AppointmentResponseDTO appointment = appointmentService.findById(id);
-            return ResponseEntity.ok(appointment);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        AppointmentResponseDTO appointment = appointmentService.findById(id);
+        return ResponseEntity.ok(appointment);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> update(@PathVariable Long id,
                                                          @RequestBody AppointmentRequestDTO dto) {
-        try {
-            AppointmentResponseDTO updated = appointmentService.update(id, dto);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        AppointmentResponseDTO updated = appointmentService.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        try {
-            appointmentService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        appointmentService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

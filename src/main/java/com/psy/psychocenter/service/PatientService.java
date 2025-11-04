@@ -2,116 +2,24 @@ package com.psy.psychocenter.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.psy.psychocenter.dto.AppointmentResponseDTO;
 import com.psy.psychocenter.dto.PatientRequestDTO;
 import com.psy.psychocenter.dto.PatientResponseDTO;
 import com.psy.psychocenter.dto.PaymentResponseDTO;
-import com.psy.psychocenter.mapper.AppointmentMapper;
-import com.psy.psychocenter.mapper.PatientMapper;
-import com.psy.psychocenter.mapper.PaymentMapper;
-import com.psy.psychocenter.model.Patient;
-import com.psy.psychocenter.repository.AppointmentRepository;
-import com.psy.psychocenter.repository.PatientRepository;
-import com.psy.psychocenter.repository.PaymentRepository;
 
-import lombok.RequiredArgsConstructor;
+public interface PatientService {
 
-@Service
-@RequiredArgsConstructor
-public class PatientService {
+    PatientResponseDTO create(PatientRequestDTO dto);
 
-    private final PatientRepository patientRepository;
-    private final AppointmentRepository appointmentRepository;
-    private final PaymentRepository paymentRepository;
+    List<PatientResponseDTO> findAll();
 
-    private final PatientMapper patientMapper;
-    private final AppointmentMapper appointmentMapper;
-    private final PaymentMapper paymentMapper;
+    PatientResponseDTO findById(Long id);
 
-    @Transactional
-    public PatientResponseDTO create(PatientRequestDTO dto) {
-        patientRepository.findByEmail(dto.email()).ifPresent(p -> {
-            throw new RuntimeException("Email already exists");
-        });
+    PatientResponseDTO update(Long id, PatientRequestDTO dto);
 
-        if (dto.packageCount() < 0) {
-            throw new RuntimeException("Package count cannot be negative");
-        }
+    void delete(Long id);
 
-        Patient patient = patientMapper.toEntity(dto);
-        Patient saved = patientRepository.save(patient);
-        return patientMapper.toResponse(saved);
-    }
+    List<AppointmentResponseDTO> getAppointments(Long patientId);
 
-    @Transactional(readOnly = true)
-    public List<PatientResponseDTO> findAll() {
-        return patientRepository.findAll()
-                .stream()
-                .map(patientMapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public PatientResponseDTO findById(Long id) {
-        return patientRepository.findById(id)
-                .map(patientMapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
-    }
-
-    @Transactional
-    public PatientResponseDTO update(Long id, PatientRequestDTO dto) {
-        Patient existing = patientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
-
-        patientRepository.findByEmail(dto.email())
-                .filter(p -> !p.getId().equals(id))
-                .ifPresent(p -> { throw new RuntimeException("Email already exists"); });
-
-        if (dto.packageCount() < 0) {
-            throw new RuntimeException("Package count cannot be negative");
-        }
-
-        existing.setName(dto.name());
-        existing.setEmail(dto.email());
-        existing.setPhone(dto.phone());
-        existing.setPackageCount(dto.packageCount());
-
-        Patient updated = patientRepository.save(existing);
-        return patientMapper.toResponse(updated);
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        if (!patientRepository.existsById(id)) {
-            throw new RuntimeException("Paciente não encontrado");
-        }
-        patientRepository.deleteById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public List<AppointmentResponseDTO> getAppointments(Long patientId) {
-        Patient patient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
-
-        return appointmentRepository.findByPatient(patient)
-                .stream()
-                .map(appointmentMapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<PaymentResponseDTO> getPayments(Long patientId) {
-        if (!patientRepository.existsById(patientId)) {
-            throw new RuntimeException("Paciente não encontrado");
-        }
-
-        return paymentRepository.findByPatientId(patientId)
-                .stream()
-                .map(paymentMapper::toResponse)
-                .toList();
-    }
+    List<PaymentResponseDTO> getPayments(Long patientId);
 }
-

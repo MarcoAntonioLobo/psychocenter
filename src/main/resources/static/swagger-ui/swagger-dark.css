@@ -1,0 +1,13 @@
+body, .swagger-ui {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+.opblock, .response-col_status, .model-box {
+  background-color: #1e1e1e !important;
+}
+
+.btn {
+  background-color: #333 !important;
+  color: #fff !important;
+}

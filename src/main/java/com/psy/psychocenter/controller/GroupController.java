@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.psy.psychocenter.dto.GroupRequestDTO;
 import com.psy.psychocenter.dto.GroupResponseDTO;
+import com.psy.psychocenter.dto.PatientResponseDTO;
+import com.psy.psychocenter.dto.SupervisionResponseDTO;
 import com.psy.psychocenter.service.GroupService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class GroupController {
 
     private final GroupService groupService;
 
+    // ===== CRUD =====
     @PostMapping
     public ResponseEntity<GroupResponseDTO> create(@RequestBody GroupRequestDTO dto) {
         GroupResponseDTO created = groupService.create(dto);
@@ -51,5 +54,17 @@ public class GroupController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         groupService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/patients")
+    public ResponseEntity<List<PatientResponseDTO>> getPatients(@PathVariable Long id) {
+        List<PatientResponseDTO> patients = groupService.getPatients(id);
+        return ResponseEntity.ok(patients);
+    }
+
+    @GetMapping("/{id}/supervisions")
+    public ResponseEntity<List<SupervisionResponseDTO>> getSupervisions(@PathVariable Long id) {
+        List<SupervisionResponseDTO> supervisions = groupService.getSupervisions(id);
+        return ResponseEntity.ok(supervisions);
     }
 }
