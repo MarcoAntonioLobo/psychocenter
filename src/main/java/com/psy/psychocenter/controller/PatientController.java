@@ -29,7 +29,8 @@ public class PatientController {
 
     @PostMapping
     public ResponseEntity<PatientResponseDTO> create(@RequestBody PatientRequestDTO dto) {
-        return ResponseEntity.ok(patientService.create(dto));
+        PatientResponseDTO created = patientService.create(dto);
+        return ResponseEntity.status(201).body(created);
     }
 
     @GetMapping

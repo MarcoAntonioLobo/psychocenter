@@ -1,5 +1,7 @@
 package com.psy.psychocenter.mapper;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.psy.psychocenter.dto.PaymentResponseDTO;
@@ -18,24 +20,21 @@ public class SupervisionMapper {
                 .notes(dto.notes())
                 .dateTime(dto.dateTime())
                 .status(SupervisionStatus.SCHEDULED)
-                .payment(payment)
                 .build();
     }
 
     public SupervisionResponseDTO toResponse(Supervision supervision) {
-        PaymentResponseDTO paymentDTO = null;
-        Payment payment = supervision.getPayment();
-        if (payment != null) {
-            paymentDTO = new PaymentResponseDTO(
-                    payment.getId(),
-                    payment.getPatient() != null ? payment.getPatient().getId() : null,
-                    payment.getPatient() != null ? payment.getPatient().getName() : null,
-                    payment.getPackageType(),
-                    payment.getAmount(),
-                    payment.getPaymentDate(),
-                    payment.getStatus()
-            );
-        } 
+        List<PaymentResponseDTO> payments = supervision.getPayments().stream()
+            .map(p -> new PaymentResponseDTO(
+                    p.getId(),
+                    p.getPatient() != null ? p.getPatient().getId() : null,
+                    p.getPatient() != null ? p.getPatient().getName() : null,
+                    p.getPackageType(),
+                    p.getAmount(),
+                    p.getPaymentDate(),
+                    p.getStatus()
+            ))
+            .toList();
 
         return new SupervisionResponseDTO(
                 supervision.getId(),
@@ -43,7 +42,7 @@ public class SupervisionMapper {
                 supervision.getNotes(),
                 supervision.getDateTime(),
                 supervision.getStatus(),
-                paymentDTO
+                payments
         );
     }
 }

@@ -34,12 +34,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseDTO create(AppointmentRequestDTO dto) {
-        if (dto.dateTime() == null) {
-            throw new ValidationException("dateTime is required");
-        }
-        if (dto.dateTime().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Appointment cannot be scheduled in the past");
-        }
+        validateDate(dto.dateTime());
 
         Patient patient = null;
         Supervision supervision = null;
@@ -49,7 +44,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
 
             if (patient.getPayments() == null || patient.getPayments().isEmpty()) {
-                throw new BusinessRuleException("Patient must have at least one payment before scheduling an appointment");
+                throw new BusinessRuleException("Patient must have a payment before scheduling an appointment");
             }
         }
 
@@ -57,14 +52,13 @@ public class AppointmentServiceImpl implements AppointmentService {
             supervision = supervisionRepository.findById(dto.supervisionId())
                     .orElseThrow(() -> new ResourceNotFoundException("Supervision not found"));
 
-            if (supervision.getPayment() == null) {
+            if (supervision.getPayments() == null || supervision.getPayments().isEmpty()) {
                 throw new BusinessRuleException("Supervision must have a payment before scheduling an appointment");
             }
         }
 
         Appointment appointment = appointmentMapper.toEntity(dto, patient, supervision);
         Appointment saved = appointmentRepository.save(appointment);
-
         return appointmentMapper.toResponse(saved);
     }
 
@@ -87,12 +81,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseDTO update(Long id, AppointmentRequestDTO dto) {
-        if (dto.dateTime() == null) {
-            throw new ValidationException("dateTime is required");
-        }
-        if (dto.dateTime().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Appointment cannot be scheduled in the past");
-        }
+        validateDate(dto.dateTime());
 
         Appointment existing = appointmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
@@ -103,15 +92,17 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (dto.patientId() != null) {
             patient = patientRepository.findById(dto.patientId())
                     .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+
             if (patient.getPayments() == null || patient.getPayments().isEmpty()) {
-                throw new BusinessRuleException("Patient must have at least one payment before updating an appointment");
+                throw new BusinessRuleException("Patient must have a payment before updating an appointment");
             }
         }
 
         if (dto.supervisionId() != null) {
             supervision = supervisionRepository.findById(dto.supervisionId())
                     .orElseThrow(() -> new ResourceNotFoundException("Supervision not found"));
-            if (supervision.getPayment() == null) {
+
+            if (supervision.getPayments() == null || supervision.getPayments().isEmpty()) {
                 throw new BusinessRuleException("Supervision must have a payment before updating an appointment");
             }
         }
@@ -133,5 +124,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new ResourceNotFoundException("Appointment not found");
         }
         appointmentRepository.deleteById(id);
+    }
+
+    private void validateDate(LocalDateTime dateTime) {
+        if (dateTime == null) throw new ValidationException("dateTime is required");
+        if (dateTime.isBefore(LocalDateTime.now()))
+            throw new ValidationException("Appointment cannot be scheduled in the past");
     }
 }

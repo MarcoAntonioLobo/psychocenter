@@ -1,0 +1,29 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+  security:
+    enabled: false
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        sql: true
+
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    "[org.hibernate.SQL]": debug
+    "[org.hibernate.type.descriptor.sql.BasicBinder]": trace

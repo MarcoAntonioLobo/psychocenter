@@ -2,6 +2,7 @@ package com.psy.psychocenter.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +28,8 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<PaymentResponseDTO> create(@RequestBody PaymentRequestDTO dto) {
-        return ResponseEntity.ok(paymentService.create(dto));
+        PaymentResponseDTO created = paymentService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
@@ -46,7 +48,8 @@ public class PaymentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PaymentResponseDTO> update(@PathVariable Long id, @RequestBody PaymentRequestDTO dto) {
+    public ResponseEntity<PaymentResponseDTO> update(@PathVariable Long id,
+                                                     @RequestBody PaymentRequestDTO dto) {
         return ResponseEntity.ok(paymentService.update(id, dto));
     }
 

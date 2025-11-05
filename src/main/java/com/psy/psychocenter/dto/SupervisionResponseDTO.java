@@ -1,6 +1,7 @@
 package com.psy.psychocenter.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.psy.psychocenter.model.enums.SupervisionStatus;
 
@@ -10,5 +11,5 @@ public record SupervisionResponseDTO(
         String notes,
         LocalDateTime dateTime,
         SupervisionStatus status,
-        PaymentResponseDTO payment
+        List<PaymentResponseDTO> payments
 ) {}

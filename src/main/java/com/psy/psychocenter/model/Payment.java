@@ -12,8 +12,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,25 +25,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "tb_payments")
 public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Patient patient;
-
-    @OneToOne
-    private Supervision supervision;
-
     @Enumerated(EnumType.STRING)
     private PackageType packageType;
 
     private BigDecimal amount;
-
     private LocalDate paymentDate;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
+
+    @ManyToOne
+    @JoinColumn(name = "supervision_id")
+    private Supervision supervision;
 }

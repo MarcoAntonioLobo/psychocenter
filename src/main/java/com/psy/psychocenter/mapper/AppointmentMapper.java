@@ -6,8 +6,8 @@ import com.psy.psychocenter.dto.AppointmentRequestDTO;
 import com.psy.psychocenter.dto.AppointmentResponseDTO;
 import com.psy.psychocenter.model.Appointment;
 import com.psy.psychocenter.model.Patient;
-import com.psy.psychocenter.model.Supervision;
 import com.psy.psychocenter.model.Payment;
+import com.psy.psychocenter.model.Supervision;
 import com.psy.psychocenter.model.enums.AppointmentStatus;
 
 @Component
@@ -31,14 +31,19 @@ public class AppointmentMapper {
         Long patientPaymentId = null;
         if (appointment.getPatient() != null && !appointment.getPatient().getPayments().isEmpty()) {
             Payment lastPayment = appointment.getPatient().getPayments()
-                                             .get(appointment.getPatient().getPayments().size() - 1);
+                    .get(appointment.getPatient().getPayments().size() - 1);
             patientPaymentId = lastPayment.getId();
         }
 
         Long supervisionId = appointment.getSupervision() != null ? appointment.getSupervision().getId() : null;
         String supervisorName = appointment.getSupervision() != null ? appointment.getSupervision().getSupervisorName() : null;
-        Long supervisionPaymentId = appointment.getSupervision() != null && appointment.getSupervision().getPayment() != null
-                                   ? appointment.getSupervision().getPayment().getId() : null;
+
+        Long supervisionPaymentId = null;
+        if (appointment.getSupervision() != null && !appointment.getSupervision().getPayments().isEmpty()) {
+            Payment lastPayment = appointment.getSupervision().getPayments()
+                    .get(appointment.getSupervision().getPayments().size() - 1);
+            supervisionPaymentId = lastPayment.getId();
+        }
 
         return new AppointmentResponseDTO(
                 appointment.getId(),
