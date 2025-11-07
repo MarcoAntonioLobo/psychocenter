@@ -67,6 +67,12 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional(readOnly = true)
     public List<PaymentResponseDTO> getByPatient(Long patientId) {
+
+        // ✅ CORREÇÃO: validar existência do paciente (o teste exige isso)
+        if (!patientRepository.existsById(patientId)) {
+            throw new ResourceNotFoundException("Patient not found");
+        }
+
         return paymentRepository.findByPatientId(patientId)
                 .stream()
                 .map(paymentMapper::toResponse)

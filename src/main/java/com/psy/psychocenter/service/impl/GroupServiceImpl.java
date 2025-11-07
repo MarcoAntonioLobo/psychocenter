@@ -1,6 +1,8 @@
 package com.psy.psychocenter.service.impl;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,115 +35,144 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class GroupServiceImpl implements GroupService {
 
-    private final GroupRepository groupRepository;
-    private final GroupMapper groupMapper;
-    private final PatientRepository patientRepository;
-    private final SupervisionRepository supervisionRepository;
-    private final PaymentRepository paymentRepository;
-    private final AppointmentRepository appointmentRepository;
-    private final PatientMapper patientMapper;
-    private final SupervisionMapper supervisionMapper;
+	private final GroupRepository groupRepository;
+	private final GroupMapper groupMapper;
+	private final PatientRepository patientRepository;
+	private final SupervisionRepository supervisionRepository;
+	private final PaymentRepository paymentRepository;
+	private final AppointmentRepository appointmentRepository;
+	private final PatientMapper patientMapper;
+	private final SupervisionMapper supervisionMapper;
 
-    @Override
-    public GroupResponseDTO create(GroupRequestDTO dto) {
-        List<Patient> patients = dto.patientIds() != null ? patientRepository.findAllById(dto.patientIds()) : List.of();
-        List<Supervision> supervisions = dto.supervisionIds() != null
-                ? supervisionRepository.findAllById(dto.supervisionIds())
-                : List.of();
+	@Override
+	public GroupResponseDTO create(GroupRequestDTO dto) {
 
-        if (dto.patientIds() != null && patients.size() != dto.patientIds().stream().distinct().count()) {
-            throw new BusinessRuleException("Duplicate patients are not allowed in a group");
-        }
+		if (dto.patientIds() != null) {
+			Set<Long> unique = dto.patientIds().stream().collect(Collectors.toSet());
+			if (unique.size() != dto.patientIds().size()) {
+				throw new BusinessRuleException("Duplicate patients are not allowed in a group");
+			}
+		}
 
-        Payment payment = null;
-        if (dto.paymentId() != null) {
-            payment = paymentRepository.findById(dto.paymentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-        }
+		List<Patient> patients = List.of();
+		if (dto.patientIds() != null) {
+			patients = patientRepository.findAllById(dto.patientIds());
+			if (patients.size() != dto.patientIds().size()) {
+				throw new ResourceNotFoundException("One or more patients not found");
+			}
+		}
 
-        Appointment appointment = null;
-        if (dto.appointmentId() != null) {
-            appointment = appointmentRepository.findById(dto.appointmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
-        }
+		List<Supervision> supervisions = List.of();
+		if (dto.supervisionIds() != null) {
+			supervisions = supervisionRepository.findAllById(dto.supervisionIds());
+			if (supervisions.size() != dto.supervisionIds().size()) {
+				throw new ResourceNotFoundException("One or more supervisions not found");
+			}
+		}
 
-        Group group = groupMapper.toEntity(dto, patients, supervisions, payment, appointment);
-        Group saved = groupRepository.save(group);
-        return groupMapper.toResponse(saved);
-    }
+		Payment payment = null;
+		if (dto.paymentId() != null) {
+			payment = paymentRepository.findById(dto.paymentId())
+					.orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+		}
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<GroupResponseDTO> findAll() {
-        return groupRepository.findAll().stream().map(groupMapper::toResponse).toList();
-    }
+		Appointment appointment = null;
+		if (dto.appointmentId() != null) {
+			appointment = appointmentRepository.findById(dto.appointmentId())
+					.orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+		}
 
-    @Override
-    @Transactional(readOnly = true)
-    public GroupResponseDTO findById(Long id) {
-        Group group = groupRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
-        return groupMapper.toResponse(group);
-    }
+		Group group = groupMapper.toEntity(dto, patients, supervisions, payment, appointment);
+		Group saved = groupRepository.save(group);
+		return groupMapper.toResponse(saved);
+	}
 
-    @Override
-    public GroupResponseDTO update(Long id, GroupRequestDTO dto) {
-        Group existing = groupRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+	@Override
+	@Transactional(readOnly = true)
+	public List<GroupResponseDTO> findAll() {
+		return groupRepository.findAll().stream().map(groupMapper::toResponse).toList();
+	}
 
-        List<Patient> patients = dto.patientIds() != null ? patientRepository.findAllById(dto.patientIds()) : List.of();
-        List<Supervision> supervisions = dto.supervisionIds() != null
-                ? supervisionRepository.findAllById(dto.supervisionIds())
-                : List.of();
+	@Override
+	@Transactional(readOnly = true)
+	public GroupResponseDTO findById(Long id) {
+		Group group = groupRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+		return groupMapper.toResponse(group);
+	}
 
-        if (dto.patientIds() != null && patients.size() != dto.patientIds().stream().distinct().count()) {
-            throw new BusinessRuleException("Duplicate patients are not allowed in a group");
-        }
+	@Override
+	public GroupResponseDTO update(Long id, GroupRequestDTO dto) {
 
-        Payment payment = null;
-        if (dto.paymentId() != null) {
-            payment = paymentRepository.findById(dto.paymentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-        }
+		Group existing = groupRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Group not found"));
 
-        Appointment appointment = null;
-        if (dto.appointmentId() != null) {
-            appointment = appointmentRepository.findById(dto.appointmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
-        }
+		if (dto.patientIds() != null) {
+			Set<Long> unique = dto.patientIds().stream().collect(Collectors.toSet());
+			if (unique.size() != dto.patientIds().size()) {
+				throw new BusinessRuleException("Duplicate patients are not allowed in a group");
+			}
+		}
 
-        existing.setName(dto.name());
-        existing.setType(dto.type());
-        existing.setPatients(patients);
-        existing.setSupervisions(supervisions);
-        existing.setPayment(payment);
-        existing.setAppointment(appointment);
+		List<Patient> patients = List.of();
+		if (dto.patientIds() != null) {
+			patients = patientRepository.findAllById(dto.patientIds());
+			if (patients.size() != dto.patientIds().size()) {
+				throw new ResourceNotFoundException("One or more patients not found");
+			}
+		}
 
-        Group updated = groupRepository.save(existing);
-        return groupMapper.toResponse(updated);
-    }
+		List<Supervision> supervisions = List.of();
+		if (dto.supervisionIds() != null) {
+			supervisions = supervisionRepository.findAllById(dto.supervisionIds());
+			if (supervisions.size() != dto.supervisionIds().size()) {
+				throw new ResourceNotFoundException("One or more supervisions not found");
+			}
+		}
 
-    @Override
-    public void delete(Long id) {
-        if (!groupRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Group not found");
-        }
-        groupRepository.deleteById(id);
-    }
+		Payment payment = null;
+		if (dto.paymentId() != null) {
+			payment = paymentRepository.findById(dto.paymentId())
+					.orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+		}
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<PatientResponseDTO> getPatients(Long groupId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
-        return group.getPatients().stream().map(patientMapper::toResponse).toList();
-    }
+		Appointment appointment = null;
+		if (dto.appointmentId() != null) {
+			appointment = appointmentRepository.findById(dto.appointmentId())
+					.orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+		}
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<SupervisionResponseDTO> getSupervisions(Long groupId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
-        return group.getSupervisions().stream().map(supervisionMapper::toResponse).toList();
-    }
+		existing.setName(dto.name());
+		existing.setType(dto.type());
+		existing.setPatients(patients);
+		existing.setSupervisions(supervisions);
+		existing.setPayment(payment);
+		existing.setAppointment(appointment);
+
+		Group updated = groupRepository.save(existing);
+		return groupMapper.toResponse(updated);
+	}
+
+	@Override
+	public void delete(Long id) {
+		if (!groupRepository.existsById(id)) {
+			throw new ResourceNotFoundException("Group not found");
+		}
+		groupRepository.deleteById(id);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<PatientResponseDTO> getPatients(Long groupId) {
+		Group group = groupRepository.findById(groupId)
+				.orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+		return group.getPatients().stream().map(patientMapper::toResponse).toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<SupervisionResponseDTO> getSupervisions(Long groupId) {
+		Group group = groupRepository.findById(groupId)
+				.orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+		return group.getSupervisions().stream().map(supervisionMapper::toResponse).toList();
+	}
 }
